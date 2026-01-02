@@ -2,9 +2,11 @@ package com.ironcorelabs.tenantsecurity.kms.v1;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
@@ -59,7 +61,17 @@ final class TenantSecurityRequest implements Closeable {
   private final int timeout;
 
   // TSC version that will be sent to the TSP.
-  static final String sdkVersion = "8.0.1";
+  static final String sdkVersion;
+
+  static {
+    try (InputStream is = TenantSecurityRequest.class.getResourceAsStream("../../version.properties")) {
+      Properties properties = new Properties();
+      properties.load(is);
+      sdkVersion = properties.getProperty("version");
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to read properties", e);
+    }
+  }
 
   TenantSecurityRequest(String tspDomain, String apiKey, int requestThreadSize, int timeout) {
     HttpHeaders headers = new HttpHeaders();
